@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+    @apply h-full w-screen bg-gray-300 text-black dark:text-white dark:bg-zinc-900;
+}
+
+button {
+    @apply rounded-lg p-2 bg-gray-300 border-transparent border-2 text-base cursor-pointer transition-colors hover:text-sky-700 hover:border-sky-700 dark:text-white dark:bg-zinc-700;
+}
