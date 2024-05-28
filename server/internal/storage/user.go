@@ -6,30 +6,21 @@ import (
 
 	"github.com/glebkk/photo-storage/server/internal/model"
 
-	pq "github.com/lib/pq"
+	_ "github.com/lib/pq"
 )
 
 type UserRepository struct {
 	db *sql.DB
 }
 
-func (ur *UserRepository) Create(user model.RegisterRequest) error {
-
-	stmt, err := ur.db.Prepare("INSERT INTO users(login, password) VALUES($1, $2)")
+func (ur *UserRepository) Create(user model.RegisterRequest) (int64, error) {
+	var id int64
+	err := ur.db.QueryRow("INSERT INTO users(login, password) VALUES($1, $2) RETURNING id", user.Login, user.Password).Scan(&id)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return 0, fmt.Errorf("%w", err)
 	}
 
-	_, err = stmt.Exec(user.Login, user.Password)
-	if err != nil {
-		if err, ok := err.(*pq.Error); ok {
-			return fmt.Errorf("%w", err)
-		}
-
-		return fmt.Errorf("%w", err)
-	}
-
-	return nil
+	return id, nil
 }
 
 func (ur *UserRepository) GetByLogin(login string) (*model.User, error) {

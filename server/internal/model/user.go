@@ -1,7 +1,12 @@
 package model
 
 type User struct {
-	Id       int64
-	Login    string
-	Password string
+	Id       int64  `json:"id"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
+}
+
+type ProfileResponse struct {
+	Id    int64  `json:"id"`
+	Login string `json:"login"`
 }

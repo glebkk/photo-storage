@@ -10,6 +10,13 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-type LoginResponse struct {
-	AccessToken string `json:"access_token"`
+type AuthResponse struct {
+	RefreshToken string          `json:"refresh_token"`
+	AccessToken  string          `json:"access_token"`
+	User         ProfileResponse `json:"user"`
+}
+
+type JwtClaims struct {
+	Id    int64  `json:"id"`
+	Login string `json:"login"`
 }

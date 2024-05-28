@@ -4,10 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/glebkk/photo-storage/server/internal/model"
-	jwt "github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,35 +14,48 @@ var (
 )
 
 type UserRepository interface {
-	Create(user model.RegisterRequest) error
+	Create(user model.RegisterRequest) (int64, error)
 	GetByLogin(login string) (*model.User, error)
 }
 
 type AuthService struct {
-	userRepo UserRepository
+	userRepo     UserRepository
+	tokenService TokenService
 }
 
-func (as *AuthService) Register(user model.RegisterRequest) error {
+func (as *AuthService) Register(user model.RegisterRequest) (*model.AuthResponse, error) {
 	hashPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	if err != nil {
-		return fmt.Errorf("hash pasw err: %w", err)
+		return nil, fmt.Errorf("hash pasw err: %w", err)
 	}
 
 	user.Password = string(hashPass)
-	err = as.userRepo.Create(user)
+	id, err := as.userRepo.Create(user)
 
 	if err != nil {
-		return fmt.Errorf("db create err: %w", err)
+		return nil, fmt.Errorf("db create err: %w", err)
 	}
 
-	return nil
+	access_token, refresh_token, err := as.tokenService.GenerateTokens(TokenPayload{login: user.Login})
+	if err != nil {
+		return nil, err
+	}
+
+	as.tokenService.SaveToken(id, refresh_token)
+
+	return &model.AuthResponse{
+		RefreshToken: refresh_token,
+		AccessToken:  access_token,
+		User: model.ProfileResponse{
+			Id:    id,
+			Login: user.Login,
+		},
+	}, nil
 }
 
-func (as *AuthService) Login(logReq model.LoginRequest) (*model.LoginResponse, error) {
+func (as *AuthService) Login(logReq model.LoginRequest) (*model.AuthResponse, error) {
 	user, err := as.userRepo.GetByLogin(logReq.Login)
-
-	fmt.Println("user from db: ", user)
 
 	if err != nil {
 		return nil, errBadCredentials
@@ -54,25 +65,63 @@ func (as *AuthService) Login(logReq model.LoginRequest) (*model.LoginResponse, e
 		return nil, errBadCredentials
 	}
 
-	payload := jwt.MapClaims{
-		"sub": user.Login,
-		"exp": time.Now().Add(time.Hour * 72).Unix(),
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
-
-	fmt.Println(os.Getenv("JWT_SECRET"))
-
-	t, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	access_token, refresh_token, err := as.tokenService.GenerateTokens(TokenPayload{login: user.Login})
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.LoginResponse{AccessToken: t}, nil
+	as.tokenService.SaveToken(user.Id, refresh_token)
+
+	return &model.AuthResponse{
+		RefreshToken: refresh_token,
+		AccessToken:  access_token,
+		User: model.ProfileResponse{
+			Id:    user.Id,
+			Login: user.Login,
+		},
+	}, nil
 }
 
-func NewAuthService(userRepo UserRepository) *AuthService {
+func (as *AuthService) Logout(refreshToken string) error {
+	err := as.tokenService.RemoveToken(refreshToken)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (as *AuthService) RefreshToken(refreshToken string) (*model.AuthResponse, error) {
+
+	claims, err := as.tokenService.ValidateToken(refreshToken, os.Getenv("JWT_REFRESH_SECRET"))
+	if err != nil {
+		return nil, err
+	}
+	user, err := as.userRepo.GetByLogin(claims["login"].(string))
+	if err != nil {
+		return nil, err
+	}
+	access_token, refresh_token, err := as.tokenService.GenerateTokens(TokenPayload{login: claims["login"].(string)})
+
+	if err != nil {
+		return nil, err
+	}
+
+	as.tokenService.SaveToken(user.Id, refresh_token)
+
+	return &model.AuthResponse{
+		RefreshToken: refresh_token,
+		AccessToken:  access_token,
+		User: model.ProfileResponse{
+			Id:    user.Id,
+			Login: user.Login,
+		},
+	}, nil
+}
+
+func NewAuthService(userRepo UserRepository, tokenService TokenService) *AuthService {
 	return &AuthService{
-		userRepo: userRepo,
+		userRepo:     userRepo,
+		tokenService: tokenService,
 	}
 }

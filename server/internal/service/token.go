@@ -1,0 +1,90 @@
+package service
+
+import (
+	"fmt"
+	"os"
+	"time"
+
+	jwt "github.com/golang-jwt/jwt/v5"
+)
+
+type TokenRepository interface {
+	SaveToken(id int64, token string) error
+	RemoveByToken(token string) error
+}
+
+type TokenService struct {
+	tokenRepo TokenRepository
+}
+
+type TokenPayload struct {
+	login string
+}
+
+func (js *TokenService) GenerateTokens(payload TokenPayload) (string, string, error) {
+	// jwt_key := os.Getenv("JWT_SECRET")
+	jwt_refresh_key := os.Getenv("JWT_REFRESH_SECRET")
+
+	access_token := jwt.NewWithClaims(jwt.SigningMethodHS512,
+		jwt.MapClaims{
+			"login": payload.login,
+			"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		},
+	)
+	fmt.Println(access_token.Claims)
+	refresh_token := jwt.NewWithClaims(jwt.SigningMethodHS512,
+		jwt.MapClaims{
+			"login": payload.login,
+			"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
+		},
+	)
+	access_jwt, err := access_token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if err != nil {
+		return "", "", fmt.Errorf("error create access_jwt %w: ", err)
+	}
+	refresh_jwt, err := refresh_token.SignedString([]byte(jwt_refresh_key))
+	if err != nil {
+		return "", "", fmt.Errorf("error create refresh_jwt %w: ", err)
+	}
+	return access_jwt, refresh_jwt, nil
+}
+
+func (ts *TokenService) SaveToken(user_id int64, refresh_token string) {
+	ts.tokenRepo.SaveToken(user_id, refresh_token)
+}
+
+func (ts *TokenService) RemoveToken(refreshToken string) error {
+	err := ts.tokenRepo.RemoveByToken(refreshToken)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ts *TokenService) ValidateToken(t string, secret_key string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			fmt.Println(ok, token.Header["alg"])
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(secret_key), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("Not valid token")
+	}
+
+	return claims, nil
+}
+
+func NewTokenService(tokenRepo TokenRepository) *TokenService {
+	return &TokenService{
+		tokenRepo: tokenRepo,
+	}
+}
