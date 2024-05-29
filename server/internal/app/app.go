@@ -21,12 +21,12 @@ type App struct {
 
 func (a *App) Run() {
 	var router = gin.Default()
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"*"},
-		AllowCredentials: true,
-		AllowHeaders:     []string{"*"},
-	}))
+	myCors := cors.DefaultConfig()
+	myCors.AllowOrigins = []string{"http://localhost:5173"}
+	myCors.AllowMethods = []string{"GET", "POST", " 	PUT", "DELETE", "OPTIONS"}
+	myCors.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
+	myCors.AllowCredentials = true
+	router.Use(cors.New(myCors))
 
 	privateRoutes := router.Group("/")
 

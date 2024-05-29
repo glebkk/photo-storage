@@ -13,6 +13,6 @@ func RegisterAuthRoutes(rg *gin.RouterGroup, uc AuthController) {
 	auth := rg.Group("/auth")
 	auth.POST("/login", uc.Login)
 	auth.POST("/register", uc.Register)
-	auth.POST("/refresh", uc.Refresh)
+	auth.GET("/refresh", uc.Refresh)
 	auth.POST("/logout", uc.Logout)
 }
