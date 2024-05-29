@@ -22,25 +22,25 @@ type TokenPayload struct {
 	login string
 }
 
-func (js *TokenService) GenerateTokens(payload TokenPayload) (string, string, error) {
+func (ts *TokenService) GenerateTokens(payload TokenPayload) (string, string, error) {
 
 	access_token := jwt.NewWithClaims(jwt.SigningMethodHS512,
 		jwt.MapClaims{
 			"login": payload.login,
-			"exp":   time.Now().Add(js.cfg.AccessExpire).Unix(),
+			"exp":   time.Now().Add(ts.cfg.AccessExpire).Unix(),
 		},
 	)
 	refresh_token := jwt.NewWithClaims(jwt.SigningMethodHS512,
 		jwt.MapClaims{
 			"login": payload.login,
-			"exp":   time.Now().Add(js.cfg.RefreshExpire).Unix(),
+			"exp":   time.Now().Add(ts.cfg.RefreshExpire).Unix(),
 		},
 	)
-	access_jwt, err := access_token.SignedString([]byte(js.cfg.AccessSecret))
+	access_jwt, err := access_token.SignedString([]byte(ts.cfg.AccessSecret))
 	if err != nil {
 		return "", "", fmt.Errorf("error create access_jwt %w: ", err)
 	}
-	refresh_jwt, err := refresh_token.SignedString([]byte(js.cfg.RefreshSecret))
+	refresh_jwt, err := refresh_token.SignedString([]byte(ts.cfg.RefreshSecret))
 	if err != nil {
 		return "", "", fmt.Errorf("error create refresh_jwt %w: ", err)
 	}
@@ -70,11 +70,13 @@ func (ts *TokenService) ValidateToken(t string, secret_key string) (jwt.MapClaim
 	})
 
 	if err != nil {
+		fmt.Println("tokens_service validate_token: ", err)
 		return nil, err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
+		fmt.Println("tokens_service claims: ", err)
 		return nil, fmt.Errorf("Not valid token")
 	}
 

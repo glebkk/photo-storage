@@ -6,6 +6,7 @@ type AuthController interface {
 	Login(c *gin.Context)
 	Register(c *gin.Context)
 	Refresh(c *gin.Context)
+	Logout(c *gin.Context)
 }
 
 func RegisterAuthRoutes(rg *gin.RouterGroup, uc AuthController) {
@@ -13,4 +14,5 @@ func RegisterAuthRoutes(rg *gin.RouterGroup, uc AuthController) {
 	auth.POST("/login", uc.Login)
 	auth.POST("/register", uc.Register)
 	auth.POST("/refresh", uc.Refresh)
+	auth.POST("/logout", uc.Logout)
 }

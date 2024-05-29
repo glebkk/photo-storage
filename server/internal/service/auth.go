@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/glebkk/photo-storage/server/internal/model"
 	"golang.org/x/crypto/bcrypt"
@@ -92,18 +91,20 @@ func (as *AuthService) Logout(refreshToken string) error {
 }
 
 func (as *AuthService) RefreshToken(refreshToken string) (*model.AuthResponse, error) {
-
-	claims, err := as.tokenService.ValidateToken(refreshToken, os.Getenv("JWT_REFRESH_SECRET"))
+	claims, err := as.tokenService.ValidateToken(refreshToken, as.tokenService.cfg.JwtConfig.RefreshSecret)
 	if err != nil {
+		fmt.Println("auth-service validatetoken: ", err)
 		return nil, err
 	}
 	user, err := as.userRepo.GetByLogin(claims["login"].(string))
 	if err != nil {
+		fmt.Println("auth-service no user: ", err)
 		return nil, err
 	}
 	access_token, refresh_token, err := as.tokenService.GenerateTokens(TokenPayload{login: claims["login"].(string)})
 
 	if err != nil {
+		fmt.Println("auth-service gen token: ", err)
 		return nil, err
 	}
 
