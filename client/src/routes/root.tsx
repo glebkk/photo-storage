@@ -1,9 +1,9 @@
 import { Outlet } from "react-router-dom";
 import { Header } from "../components/Layout/Header";
 import { Sidebar } from "../components/Layout/Sidebar";
+import { observer } from "mobx-react-lite";
 
-export function Root() {
-
+export const Root = observer(function(){
     return (
         <div className="flex flex-col gap-2 sm:flex-row">
             <Sidebar />
@@ -16,5 +16,5 @@ export function Root() {
             </div>
         </div>
     );
-}
+})
 

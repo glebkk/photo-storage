@@ -1,11 +1,10 @@
+import { observer } from 'mobx-react-lite';
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext';
+import { Navigate, useLocation } from 'react-router-dom';
 
-export const PrivateRoute = ({ children } : {children: ReactNode}) => {
-  const { user } = useAuth();
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-  return children;
-};
+const PrivateRoute = observer(({ children, isAuth }: { children: ReactNode, isAuth: boolean }) => {
+  const location = useLocation()
+  return isAuth ? children : <Navigate to="/login" state={{ from: location }} />
+})
+
+export default PrivateRoute
