@@ -5,6 +5,10 @@ database:
   name: diplom
   user: postgres
   password: postgres
-storage_path: "./storage/storage.db"
+jwt:
+  access_secret: access_secret
+  refresh_secret: refresh_secret
+  access_expire: 24h
+  refresh_expire: 720h
 http:
   address: "0.0.0.0:8080"

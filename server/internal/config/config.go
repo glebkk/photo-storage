@@ -3,13 +3,15 @@ package config
 import (
 	"flag"
 	"os"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	DataBase `yaml:"database"`
-	HTTP     HTTP `yaml:"http"`
+	DataBase  `yaml:"database"`
+	JwtConfig `yaml:"jwt"`
+	HTTP      HTTP `yaml:"http"`
 }
 
 type HTTP struct {
@@ -22,6 +24,13 @@ type DataBase struct {
 	Name     string `yaml:"name"`
 	User     string `yaml:"user"`
 	Port     int    `yaml:"port"`
+}
+
+type JwtConfig struct {
+	AccessExpire  time.Duration `yaml:"access_expire"`
+	RefreshExpire time.Duration `yaml:"refresh_expire"`
+	RefreshSecret string        `yaml:"refresh_secret"`
+	AccessSecret  string        `yaml:"access_secret"`
 }
 
 func MustLoad() *Config {

@@ -2,9 +2,9 @@ package service
 
 import (
 	"fmt"
-	"os"
 	"time"
 
+	"github.com/glebkk/photo-storage/server/internal/config"
 	jwt "github.com/golang-jwt/jwt/v5"
 )
 
@@ -15,6 +15,7 @@ type TokenRepository interface {
 
 type TokenService struct {
 	tokenRepo TokenRepository
+	cfg       config.Config
 }
 
 type TokenPayload struct {
@@ -22,27 +23,24 @@ type TokenPayload struct {
 }
 
 func (js *TokenService) GenerateTokens(payload TokenPayload) (string, string, error) {
-	// jwt_key := os.Getenv("JWT_SECRET")
-	jwt_refresh_key := os.Getenv("JWT_REFRESH_SECRET")
 
 	access_token := jwt.NewWithClaims(jwt.SigningMethodHS512,
 		jwt.MapClaims{
 			"login": payload.login,
-			"exp":   time.Now().Add(time.Hour * 24).Unix(),
+			"exp":   time.Now().Add(js.cfg.AccessExpire).Unix(),
 		},
 	)
-	fmt.Println(access_token.Claims)
 	refresh_token := jwt.NewWithClaims(jwt.SigningMethodHS512,
 		jwt.MapClaims{
 			"login": payload.login,
-			"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
+			"exp":   time.Now().Add(js.cfg.RefreshExpire).Unix(),
 		},
 	)
-	access_jwt, err := access_token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	access_jwt, err := access_token.SignedString([]byte(js.cfg.AccessSecret))
 	if err != nil {
 		return "", "", fmt.Errorf("error create access_jwt %w: ", err)
 	}
-	refresh_jwt, err := refresh_token.SignedString([]byte(jwt_refresh_key))
+	refresh_jwt, err := refresh_token.SignedString([]byte(js.cfg.RefreshSecret))
 	if err != nil {
 		return "", "", fmt.Errorf("error create refresh_jwt %w: ", err)
 	}
@@ -83,8 +81,9 @@ func (ts *TokenService) ValidateToken(t string, secret_key string) (jwt.MapClaim
 	return claims, nil
 }
 
-func NewTokenService(tokenRepo TokenRepository) *TokenService {
+func NewTokenService(tokenRepo TokenRepository, config config.Config) *TokenService {
 	return &TokenService{
 		tokenRepo: tokenRepo,
+		cfg:       config,
 	}
 }

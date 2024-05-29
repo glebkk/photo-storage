@@ -3,7 +3,6 @@ package app
 import (
 	"database/sql"
 	"fmt"
-	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -36,11 +35,11 @@ func (a *App) Run() {
 	tokenRepo := storage.NewTokenRepository(a.db)
 
 	//init services
-	tokenService := service.NewTokenService(tokenRepo)
+	tokenService := service.NewTokenService(tokenRepo, *a.cfg)
 	authService := service.NewAuthService(userRepo, *tokenService)
 
 	//init middlewares
-	privateRoutes.Use(middleware.JwtAuthMiddleware(os.Getenv("JWT_SECRET"), tokenService))
+	privateRoutes.Use(middleware.JwtAuthMiddleware(a.cfg.JwtConfig.AccessSecret, tokenService))
 
 	//init controllers
 	authController := controller.NewAuthController(authService)
