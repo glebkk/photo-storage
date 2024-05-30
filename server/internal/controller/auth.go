@@ -29,7 +29,9 @@ func (ac *AuthController) Register(c *gin.Context) {
 
 	authRes, err := ac.service.Register(user)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, err)
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 	c.SetCookie("refresh_token", authRes.RefreshToken, 30*24*60*60*1000, "/", "localhost", true, true)
@@ -57,6 +59,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 func (ac *AuthController) Logout(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
+		fmt.Println(err)
 		c.Writer.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -64,6 +67,7 @@ func (ac *AuthController) Logout(c *gin.Context) {
 	err = ac.service.Logout(refreshToken)
 
 	if err != nil {
+		fmt.Println(err)
 		c.Writer.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -75,7 +79,6 @@ func (ac *AuthController) Logout(c *gin.Context) {
 func (ac *AuthController) Refresh(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
-		fmt.Println(err)
 		c.Writer.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -83,7 +86,6 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 	authResp, err := ac.service.RefreshToken(refreshToken)
 
 	if err != nil {
-		fmt.Println(err)
 		c.Writer.WriteHeader(http.StatusUnauthorized)
 		return
 	}

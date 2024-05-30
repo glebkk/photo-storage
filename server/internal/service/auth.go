@@ -26,17 +26,17 @@ func (as *AuthService) Register(user model.RegisterRequest) (*model.AuthResponse
 	hashPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	if err != nil {
-		return nil, fmt.Errorf("hash pasw err: %w", err)
+		return nil, err
 	}
 
 	user.Password = string(hashPass)
 	id, err := as.userRepo.Create(user)
 
 	if err != nil {
-		return nil, fmt.Errorf("db create err: %w", err)
+		return nil, err
 	}
 
-	access_token, refresh_token, err := as.tokenService.GenerateTokens(TokenPayload{login: user.Login})
+	access_token, refresh_token, err := as.tokenService.GenerateTokens(TokenPayload{id: id, login: user.Login})
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (as *AuthService) Login(logReq model.LoginRequest) (*model.AuthResponse, er
 		return nil, errBadCredentials
 	}
 
-	access_token, refresh_token, err := as.tokenService.GenerateTokens(TokenPayload{login: user.Login})
+	access_token, refresh_token, err := as.tokenService.GenerateTokens(TokenPayload{id: user.Id, login: user.Login})
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (as *AuthService) RefreshToken(refreshToken string) (*model.AuthResponse, e
 		fmt.Println("auth-service no user: ", err)
 		return nil, err
 	}
-	access_token, refresh_token, err := as.tokenService.GenerateTokens(TokenPayload{login: claims["login"].(string)})
+	access_token, refresh_token, err := as.tokenService.GenerateTokens(TokenPayload{id: int64(claims["id"].(float64)), login: claims["login"].(string)})
 
 	if err != nil {
 		fmt.Println("auth-service gen token: ", err)

@@ -12,6 +12,7 @@ import (
 func JwtAuthMiddleware(secret string, tokenService *service.TokenService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
+		fmt.Println(authHeader)
 		token := strings.Split(authHeader, " ")
 		fmt.Println(token, len(token))
 		if len(token) != 2 {

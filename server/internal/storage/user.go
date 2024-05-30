@@ -2,7 +2,7 @@ package storage
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 
 	"github.com/glebkk/photo-storage/server/internal/model"
 
@@ -17,7 +17,7 @@ func (ur *UserRepository) Create(user model.RegisterRequest) (int64, error) {
 	var id int64
 	err := ur.db.QueryRow("INSERT INTO users(login, password) VALUES($1, $2) RETURNING id", user.Login, user.Password).Scan(&id)
 	if err != nil {
-		return 0, fmt.Errorf("%w", err)
+		return 0, errors.New("пользователь с таким логином уже существует")
 	}
 
 	return id, nil

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -15,10 +16,12 @@ type TokenRepository interface {
 
 type TokenService struct {
 	tokenRepo TokenRepository
+	userRepo  UserRepository
 	cfg       config.Config
 }
 
 type TokenPayload struct {
+	id    int64
 	login string
 }
 
@@ -26,12 +29,14 @@ func (ts *TokenService) GenerateTokens(payload TokenPayload) (string, string, er
 
 	access_token := jwt.NewWithClaims(jwt.SigningMethodHS512,
 		jwt.MapClaims{
+			"id":    payload.id,
 			"login": payload.login,
 			"exp":   time.Now().Add(ts.cfg.AccessExpire).Unix(),
 		},
 	)
 	refresh_token := jwt.NewWithClaims(jwt.SigningMethodHS512,
 		jwt.MapClaims{
+			"id":    payload.id,
 			"login": payload.login,
 			"exp":   time.Now().Add(ts.cfg.RefreshExpire).Unix(),
 		},
@@ -62,8 +67,8 @@ func (ts *TokenService) RemoveToken(refreshToken string) error {
 
 func (ts *TokenService) ValidateToken(t string, secret_key string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			fmt.Println(ok, token.Header["alg"])
+		if a, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			fmt.Println(ok, a)
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(secret_key), nil
@@ -80,12 +85,24 @@ func (ts *TokenService) ValidateToken(t string, secret_key string) (jwt.MapClaim
 		return nil, fmt.Errorf("Not valid token")
 	}
 
+	if claims["login"] == nil {
+		return nil, errors.New("Not valid token")
+	}
+
+	fmt.Println(claims["login"])
+
+	user, err := ts.userRepo.GetByLogin(claims["login"].(string))
+	if err != nil || user == nil {
+		return nil, errors.New("Not valid token")
+	}
+
 	return claims, nil
 }
 
-func NewTokenService(tokenRepo TokenRepository, config config.Config) *TokenService {
+func NewTokenService(tokenRepo TokenRepository, userRepo UserRepository, config config.Config) *TokenService {
 	return &TokenService{
 		tokenRepo: tokenRepo,
 		cfg:       config,
+		userRepo:  userRepo,
 	}
 }

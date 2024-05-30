@@ -9,9 +9,10 @@ import (
 )
 
 type Config struct {
-	DataBase  `yaml:"database"`
-	JwtConfig `yaml:"jwt"`
-	HTTP      HTTP `yaml:"http"`
+	DataBase   `yaml:"database"`
+	JwtConfig  `yaml:"jwt"`
+	PhotosPath string `yaml:"photos_path"`
+	HTTP       HTTP   `yaml:"http"`
 }
 
 type HTTP struct {
