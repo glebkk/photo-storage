@@ -1,11 +1,24 @@
+import axios, { AxiosError } from "axios";
 import { makeAutoObservable } from "mobx";
+import { toast } from "react-toastify";
 import { AuthService } from "../api/AuthService";
+import { PhotoService } from "../api/PhotoService";
 import { User } from "../api/models/User";
-import axios from "axios";
-import { API_URL } from "../axios/axios";
 import { AuthReponse } from "../api/models/response";
+import { API_URL } from "../axios/axios";
 
-export default class Store {
+
+export class RootStore {
+    authStore: AuthStore
+    photoStore: PhotoStore
+
+    constructor() {
+        this.authStore = new AuthStore()
+        this.photoStore = new PhotoStore()
+    }
+}
+
+export class AuthStore {
     user = {} as User
     isAuth = false;
     isLoading = false;
@@ -33,8 +46,16 @@ export default class Store {
             localStorage.setItem("token", resp.data.access_token);
             this.setAuth(true);
             this.setUser(resp.data.user)
-        } catch (err) {
-            console.log("login error", err);
+        } catch (err: unknown) {
+
+            if (err instanceof AxiosError) {
+                toast(err?.response?.data, { className: "bg-red-600", hideProgressBar: true })
+            }
+            if (err instanceof String) {
+                console.log(err);
+
+                toast(err)
+            }
         }
     }
 
@@ -44,8 +65,15 @@ export default class Store {
             localStorage.setItem("token", resp.data.access_token);
             this.setAuth(true);
             this.setUser(resp.data.user)
-        } catch (err) {
-            console.log("register error", err);
+        } catch (err: unknown) {
+            if (err instanceof AxiosError) {
+                toast(err?.response?.data?.message, { className: "bg-red-600", hideProgressBar: true })
+            }
+            if (err instanceof String) {
+                console.log(err);
+
+                toast(err)
+            }
         }
     }
 
@@ -69,9 +97,75 @@ export default class Store {
             this.setAuth(false);
             this.setUser({} as User)
             localStorage.removeItem("token");
-        } catch (err) {
-            console.log("logout error");
+        } catch (err: unknown) {
+            console.log("logout err: ", err);
+            if (err instanceof AxiosError) {
+                toast(err?.response?.data, { className: "bg-red-600", hideProgressBar: true })
+            }
+            if (err instanceof String) {
+                console.log(err);
+
+                toast(err)
+            }
         }
     }
 
+}
+
+export class PhotoStore {
+    photos = [] as Photo[]
+    photosForUpload: File[] = [];
+    staticPath = "public/"
+
+
+    setPhotos(photos: Photo[]) {
+        this.photos = photos
+    }
+
+    setPhotosForUpload(files: File[]) {
+        this.photosForUpload.push(...files)
+    }
+
+    removePhotoUpload(index: number) {
+        this.photosForUpload = this.photosForUpload.filter((_, ind) => ind !== index)
+    }
+
+    async getPhotos() {
+        try {
+            const photos = await PhotoService.getPhotos();
+            console.log(photos.data);
+
+            this.setPhotos(photos.data)
+        } catch (err: unknown) {
+            console.log("getPhotos err: ", err);
+            if (err instanceof AxiosError) {
+                toast(err?.response?.data.message, { className: "bg-red-600 text-white", hideProgressBar: true })
+            }
+            if (err instanceof String) {
+                console.log(err);
+
+                toast(err)
+            }
+        }
+    }
+
+    async createPhoto(file: PhotoCreate) {
+        try {
+            console.log(file);
+            const formData = new FormData()
+            formData.append("file", file.file)
+            formData.append("name", file.name)
+            const createdPhoto = await PhotoService.createPhoto(formData)
+            this.setPhotos([createdPhoto.data, ...this.photos || []])
+        } catch (e) {
+            console.log("create photo errir", e);
+            if (e instanceof AxiosError) {
+                toast(e?.response?.data?.message, { className: "bg-red-600 text-white", hideProgressBar: true })
+            }
+        }
+    }
+
+    constructor() {
+        makeAutoObservable(this);
+    }
 }

@@ -3,13 +3,13 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './assets/index.css'
 import { ThemeProvider } from './context/ThemeContext.tsx'
-import Store from './store/store.ts'
+import {RootStore} from './store/store.ts'
 
 interface StoreState {
-  store: Store
+  store: RootStore
 }
 
-const store = new Store()
+const store = new RootStore()
 
 export const StoreContext = createContext<StoreState>({
   store,

@@ -5,3 +5,5 @@ export type AuthReponse = {
     refresh_token: string,
     user: User
 }
+
+export type PhotosResponse = Photo[]

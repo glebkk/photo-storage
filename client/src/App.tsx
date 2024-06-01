@@ -1,32 +1,37 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { observer } from "mobx-react-lite"
+import { useContext, useEffect } from "react"
+import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { StoreContext } from "./main"
+import { GalleryPage } from "./pages/GalleryPage"
+import { LoaderPage } from "./pages/LoaderPage"
 import LoginPage from "./pages/LoginPage"
 import { RegisterPage } from "./pages/RegisterPage"
 import PrivateRoute from "./routes/PrivateRoute"
 import { Root } from "./routes/root"
-import { observer } from "mobx-react-lite"
-import { useContext, useEffect } from "react"
-import { StoreContext } from "./main"
 
 function App() {
-  const { store } = useContext(StoreContext)
+  const { store: { authStore } } = useContext(StoreContext)
 
   useEffect(() => {
-    store.checkAuth()
+    (async () => {
+      await authStore.checkAuth()
+    })()
   }, [])
 
-  if (store.isLoading) {
-    return "..."
+  if (authStore.isLoading) {
+    return <LoaderPage />
   }
 
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={
-          <PrivateRoute isAuth={store.isAuth}>
+          <PrivateRoute isAuth={authStore.isAuth}>
             <Root />
           </PrivateRoute>
         }>
-          <Route path="/" element={<div>{store.isAuth ? store.user.login : "unauth"}</div>} />
+          <Route path="/" element={<GalleryPage />} />
+
         </Route>
 
         <Route path="/login" element={<LoginPage />} />
