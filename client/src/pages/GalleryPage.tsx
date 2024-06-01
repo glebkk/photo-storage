@@ -1,31 +1,20 @@
 import { observer } from "mobx-react-lite";
-import { useContext, useEffect, useState } from "react";
-import { MdDeleteForever } from "react-icons/md";
+import { ReactNode, useContext, useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import { API_URL } from "../axios/axios";
+import { UploadFilesForm } from "../components/Forms/UploadFilesForm";
 import { Tooltip } from "../components/Tooltip";
 import { TooltipContext } from "../context/TooltipContext";
 import { StoreContext } from "../main";
-import { ToastContainer } from "react-toastify"
-import 'react-toastify/dist/ReactToastify.css';
-import { GoDash } from "react-icons/go";
-import { useForm } from "react-hook-form";
 
-type FormValues = {
-    files: PhotoCreate[]
-}
+
 
 export const GalleryPage = observer(() => {
     const { isTooltipOpen, setIsTooltipOpen } = useContext(TooltipContext)
     const { photoStore } = useContext(StoreContext).store
 
-    const { register, handleSubmit } = useForm<FormValues>();
-
-    const onSubmit = (data: FormValues) => {
-        console.log("data", data);
-        data.files.forEach(file => {
-            photoStore.createPhoto({ name: file.name, file: file.file })
-        })
-    };
+    
 
     useEffect(() => {
         photoStore.getPhotos()
@@ -33,78 +22,31 @@ export const GalleryPage = observer(() => {
 
     function onDrop(e: React.DragEvent<HTMLDivElement>) {
         console.log(e)
-        photoStore.setPhotosForUpload([...e.dataTransfer.files])
+        photoStore.appendPhotosForUpload([...e.dataTransfer.files])
         setIsTooltipOpen(true)
     }
 
-
-    function handleUpload(e: React.MouseEvent) {
-        e.preventDefault()
-        console.log(photoStore.photosForUpload);
-
-        photoStore.photosForUpload.forEach(file => {
-            photoStore.createPhoto({ name: file.name, file })
-        })
-    }
-
     return (
-        <>
+        <DropZone onDrop={onDrop} dropText="Отпустите чтобы загрузить">
             <ToastContainer />
             <div className="min-h-full m-4 flex flex-col gap-2 relative">
                 <h1 className="text-lg">Все фотографии</h1>
                 <ImageList photos={photoStore.photos} />
-                <DropZone onDrop={onDrop} dropText="Отпустите чтобы загрузить" />
                 <Tooltip className="w-1/2 h-[90%]" isOpen={isTooltipOpen}>
-                    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col justify-between gap-4 p-4 rounded-lg bg-gray-300 dark:bg-zinc-700 relative h-full overflow-hidden">
-                        <div className="overflow-hidden h-full flex gap-2 flex-col">
-                            <p className="font-bold text-lg self-end cursor-pointer"><GoDash size={20} /></p>
-                            <div className="h-full overflow-y-auto flex flex-col gap-2">
-                                {photoStore.photosForUpload.map((file, index) => (
-                                    <div key={index} className="flex gap-2 items-center justify-between">
-                                        <div className="flex gap-2 items-start w-full">
-                                            <img className="h-32 aspect-square object-cover rounded-md" src={URL.createObjectURL(file)} alt="img" />
-                                            <div className="flex flex-col gap-2 h-full w-full">
-                                                <label htmlFor="">Название файла</label>
-                                                <input
-                                                    {...register(`files.${index}.name`)}
-                                                    className="w-full"
-                                                    type="text"
-                                                    defaultValue={file.name}
-                                                    required
-                                                    placeholder="Введите название" />
-                                                <button
-                                                    className="self-start"
-                                                    onClick={() => photoStore.removePhotoUpload(index)}
-                                                >
-                                                    <MdDeleteForever size={22} />
-                                                </button>
-                                            </div>
-                                            <input
-                                                {...register(`files.${index}.file`, { value: file })}
-                                                type="hidden"
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex justify-between">
-                            <button className="button-inverse">Добавить</button>
-                            <button className="self-end" type="submit">Отправить</button>
-                        </div>
-                    </form>
+                    <UploadFilesForm />
                 </Tooltip>
             </div>
-        </>
+        </DropZone>
     )
 })
 
 type DropZoneProps = {
     onDrop: (e: React.DragEvent<HTMLDivElement>) => void
     dropText: string
+    children: ReactNode
 }
 
-export const DropZone = ({ onDrop, dropText }: DropZoneProps) => {
+export const DropZone = ({ onDrop, dropText, children }: DropZoneProps) => {
     const [drag, setDrag] = useState(false)
 
     function dragStartHandler(e: React.DragEvent<HTMLDivElement>) {
@@ -135,11 +77,13 @@ export const DropZone = ({ onDrop, dropText }: DropZoneProps) => {
                     {dropText}
                 </div> :
                 <div
-                    className="absolute top-0 left-0 w-full h-full bg-transparent text-white text-center"
+                    className=""
                     onDragStart={(e) => dragStartHandler(e)}
                     onDragOver={(e) => dragStartHandler(e)}
                     onDragLeave={(e) => dragLeaveHandler(e)}
-                />
+                >
+                    {children}
+                </div>
             }
         </>
     )
@@ -151,7 +95,7 @@ export const ImageList = ({ photos }: { photos: Photo[] }) => {
     }
 
     return (
-        <div className="w-full grid grid-cols-4 gap-4 lg:grid-cols-4">
+        <div className="w-full grid grid-cols-2 gap-4 md:grid-cols-4">
             {photos.map(img => (
                 <Image key={img.id} photo={img} />
             ))}
@@ -163,9 +107,11 @@ export const Image = observer(({ photo }: { photo: Photo }) => {
     const { photoStore } = useContext(StoreContext).store
 
     return (
-        <div className="w-full aspect-square rounded-lg bg-gray-200 dark:bg-zinc-600 transition-shadow hover:shadow-inner overflow-hidden">
+        <div className="w-full relative aspect-square rounded-lg bg-gray-200 dark:bg-zinc-600 group cursor-pointer overflow-hidden">
             <img className="w-full h-full object-cover" src={`${API_URL}/${photoStore.staticPath}${photo.userId}/${photo.filePath}`} alt={photo.filePath} />
-            <p>{photo.name}</p>
+            <div className="opacity-0 absolute top-0 left-0 w-full h-full group-hover:opacity-100 transition-opacity flex items-center justify-center text-center bg-black/70">
+                <p className="text-white">{photo.name}</p>
+            </div>
         </div>
     )
 })

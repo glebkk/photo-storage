@@ -122,8 +122,12 @@ export class PhotoStore {
         this.photos = photos
     }
 
-    setPhotosForUpload(files: File[]) {
+    appendPhotosForUpload(files: File[]) {
         this.photosForUpload.push(...files)
+    }
+
+    setPhotosForUpload(files: File[]){
+        this.photosForUpload = files
     }
 
     removePhotoUpload(index: number) {
@@ -133,8 +137,6 @@ export class PhotoStore {
     async getPhotos() {
         try {
             const photos = await PhotoService.getPhotos();
-            console.log(photos.data);
-
             this.setPhotos(photos.data)
         } catch (err: unknown) {
             console.log("getPhotos err: ", err);

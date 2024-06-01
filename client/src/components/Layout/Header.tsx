@@ -1,16 +1,16 @@
 import { observer } from "mobx-react-lite";
-import { createRef, useContext, useRef } from "react";
+import { createRef, useContext } from "react";
 import { FaUserAlt } from "react-icons/fa";
 import { IoMenu } from "react-icons/io5";
+import { TooltipContext } from "../../context/TooltipContext";
 import { StoreContext } from "../../main";
 import { Dropdown } from "../Popup";
 import { ThemeSwitcher } from "./ThemeSwitcher";
-import { TooltipContext } from "../../context/TooltipContext";
 
 
 export const Header = observer(() => {
     const { store: { authStore: store, photoStore } } = useContext(StoreContext)
-    const { toggleTooltip } = useContext(TooltipContext)
+    const { setIsTooltipOpen } = useContext(TooltipContext)
     const inputRef = createRef<HTMLInputElement>()
 
     return (
@@ -19,11 +19,11 @@ export const Header = observer(() => {
                 if(!e.target.files){
                     return
                 }
-                photoStore.setPhotosForUpload([...e.target.files])
+                photoStore.appendPhotosForUpload([...e.target.files])
             }} type="file" multiple hidden accept="image/*" ref={inputRef}/>
             <button className="h-full" onClick={() => {
                 inputRef.current?.click()
-                toggleTooltip()
+                setIsTooltipOpen(true)
             }}>Загрузить</button>
             <input className="w-full h-full" type="text" placeholder="Поиск" />
             {/* image */}
@@ -39,7 +39,7 @@ export const Header = observer(() => {
                 }
             >
                 <div className="flex flex-col">
-                    <ThemeSwitcher className="self-start" />
+                    <ThemeSwitcher />
                     <a className="rounded-md px-2 py-3 hover:bg-zinc-800 hover:text-white dark:hover:bg-white dark:hover:text-black" href="#">Настройки</a>
                     <p className="rounded-md px-2 py-3 hover:bg-zinc-800 hover:text-white dark:hover:bg-white dark:hover:text-black cursor-pointer" onClick={() => store.logout()}>Выйти</p>
                 </div>
