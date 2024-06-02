@@ -43,6 +43,7 @@ func (a *App) Run() {
 	tokenService := service.NewTokenService(tokenRepo, userRepo, *a.cfg)
 	authService := service.NewAuthService(userRepo, *tokenService)
 	photoService := service.NewPhotoService(photoRepo)
+	userService := service.NewUserService(userRepo)
 
 	//init middlewares
 	privateRoutes.Use(middleware.JwtAuthMiddleware(a.cfg.JwtConfig.AccessSecret, tokenService))
@@ -50,12 +51,13 @@ func (a *App) Run() {
 	//init controllers
 	authController := controller.NewAuthController(authService)
 	photoController := controller.NewPhotoController(photoService, *a.cfg)
+	userController := controller.NewUserController(userService)
 
 	//init routes
 	routes.RegisterAuthRoutes(&router.RouterGroup, authController)
 	routes.RegisterPingRoutes(&router.RouterGroup)
 
-	routes.RegisterUserRoutes(privateRoutes)
+	routes.RegisterUserRoutes(privateRoutes, userController)
 	routes.RegisterPhotoRoutes(privateRoutes, photoController)
 
 	//run server

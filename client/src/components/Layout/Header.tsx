@@ -6,6 +6,7 @@ import { TooltipContext } from "../../context/TooltipContext";
 import { StoreContext } from "../../main";
 import { Dropdown } from "../Popup";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { Link } from "react-router-dom";
 
 
 export const Header = observer(() => {
@@ -40,7 +41,7 @@ export const Header = observer(() => {
             >
                 <div className="flex flex-col">
                     <ThemeSwitcher />
-                    <a className="rounded-md px-2 py-3 hover:bg-zinc-800 hover:text-white dark:hover:bg-white dark:hover:text-black" href="#">Настройки</a>
+                    <Link to="/settings" className="rounded-md px-2 py-3 hover:bg-zinc-800 hover:text-white dark:hover:bg-white dark:hover:text-black">Настройки</Link>
                     <p className="rounded-md px-2 py-3 hover:bg-zinc-800 hover:text-white dark:hover:bg-white dark:hover:text-black cursor-pointer" onClick={() => store.logout()}>Выйти</p>
                 </div>
             </Dropdown>

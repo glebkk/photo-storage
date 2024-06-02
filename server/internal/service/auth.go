@@ -15,6 +15,8 @@ var (
 type UserRepository interface {
 	Create(user model.RegisterRequest) (int64, error)
 	GetByLogin(login string) (*model.User, error)
+	UpdatePassword(userId int64, newPassword string) error
+	GetById(id int64) (*model.User, error)
 }
 
 type AuthService struct {

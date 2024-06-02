@@ -29,7 +29,7 @@ export const GalleryPage = observer(() => {
     return (
         <DropZone onDrop={onDrop} dropText="Отпустите чтобы загрузить">
             <ToastContainer />
-            <div className="min-h-full m-4 flex flex-col gap-2 relative">
+            <div className="min-h-full flex flex-col gap-2 relative">
                 <h1 className="text-lg">Все фотографии</h1>
                 <ImageList photos={photoStore.photos} />
                 <Tooltip className="w-1/2 h-[90%]" isOpen={isTooltipOpen}>

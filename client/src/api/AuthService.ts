@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 import { instance } from "../axios/axios";
-import { AuthReponse } from "./models/response";
+import { AuthReponse, UpdatePasswordResponse } from "./models/response";
 
 export class AuthService {
 
@@ -18,6 +18,10 @@ export class AuthService {
 
     static logout(): Promise<void> {
         return instance.post("/auth/logout")
+    }
+
+    static updatePassword(oldPassword: string, newPassword: string): Promise<AxiosResponse<UpdatePasswordResponse>> {
+        return instance.put<UpdatePasswordResponse>("/user/password", {oldPassword, newPassword})
     }
     
 }

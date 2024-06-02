@@ -6,4 +6,8 @@ export type AuthReponse = {
     user: User
 }
 
+export type UpdatePasswordResponse = {
+    message: string
+}
+
 export type PhotosResponse = Photo[]

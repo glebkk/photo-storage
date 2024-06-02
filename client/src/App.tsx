@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite"
-import { useContext, useEffect } from "react"
+import { useContext, useEffect, useState } from "react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { StoreContext } from "./main"
 import { GalleryPage } from "./pages/GalleryPage"
@@ -8,18 +8,21 @@ import LoginPage from "./pages/LoginPage"
 import { RegisterPage } from "./pages/RegisterPage"
 import PrivateRoute from "./routes/PrivateRoute"
 import { Root } from "./routes/root"
+import { UserSettingPage } from "./pages/UserSettingPage"
 
 function App() {
   const { store: { authStore } } = useContext(StoreContext)
+  const [isAppReady, setIsAppReady] = useState(false)
 
   useEffect(() => {
     (async () => {
-      await authStore.checkAuth()
+      authStore.checkAuth();
+      setIsAppReady(true);
     })()
-  }, [])
+  }, [authStore]);
 
-  if (authStore.isLoading) {
-    return <LoaderPage />
+  if (authStore.isLoading || !isAppReady) {
+    return <LoaderPage />;
   }
 
   return (
@@ -31,7 +34,7 @@ function App() {
           </PrivateRoute>
         }>
           <Route path="/" element={<GalleryPage />} />
-
+          <Route path="settings" element={<UserSettingPage />} />
         </Route>
 
         <Route path="/login" element={<LoginPage />} />

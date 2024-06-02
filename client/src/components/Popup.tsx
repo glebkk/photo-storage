@@ -29,10 +29,8 @@ export const Dropdown = ({ rendererElement, children }: Props) => {
     }, []);
 
     return (
-        <div className='relative' ref={dropdownRef}>
-            <div className='relative' onClick={toggleDropdown}>
-                {rendererElement}
-            </div>
+        <div className='relative' onClick={toggleDropdown} ref={dropdownRef}>
+            {rendererElement}
             {
                 isOpen &&
                 <div className="rounded-lg bg-gray-300 p-2 absolute z-50 right-0 border-2 border-gray-400 dark:border-zinc-700 dark:bg-zinc-900 min-w-32">
