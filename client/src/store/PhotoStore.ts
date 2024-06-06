@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { PhotoService } from "../api/PhotoService";
 
 export class PhotoStore {
-    photos = [] as Photo[]
+    photos: Photo[] = []
     photosForUpload: File[] = [];
     staticPath = "public/"
 
@@ -22,7 +22,11 @@ export class PhotoStore {
     }
 
     removePhotoUpload(index: number) {
+        console.log(index);
+        
         this.photosForUpload = this.photosForUpload.filter((_, ind) => ind !== index)
+        console.log(this.photosForUpload);
+        
     }
 
     async getPhotos() {
@@ -44,12 +48,13 @@ export class PhotoStore {
 
     async createPhoto(file: PhotoCreate) {
         try {
-            console.log(file);
             const formData = new FormData()
             formData.append("file", file.file)
             formData.append("name", file.name)
             const createdPhoto = await PhotoService.createPhoto(formData)
-            this.setPhotos([createdPhoto.data, ...this.photos || []])
+
+            this.photos.push(createdPhoto.data)
+            toast("Фото успешно загружено", { className: "bg-green-600 text-white", hideProgressBar: true })
         } catch (e) {
             console.log("create photo errir", e);
             if (e instanceof AxiosError) {

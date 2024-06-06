@@ -1,29 +1,34 @@
 import { observer } from "mobx-react-lite";
-import { ReactNode, useContext, useEffect, useState } from "react";
+import { ReactNode, createRef, useContext, useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { API_URL } from "../axios/axios";
-import { UploadFilesForm } from "../components/Forms/UploadFilesForm";
-import { Tooltip } from "../components/Tooltip";
+import { GroupingSelector, GroupingType } from "../components/GroupingSelector";
+import { PhotosManager } from "../components/Tooltip/PhotosManager";
 import { TooltipContext } from "../context/TooltipContext";
 import { StoreContext } from "../main";
 
 
 
 export const GalleryPage = observer(() => {
-    const { isTooltipOpen, setIsTooltipOpen } = useContext(TooltipContext)
+    const { setIsTooltipOpen } = useContext(TooltipContext)
     const { photoStore } = useContext(StoreContext).store
-
-    
+    const [groupingType, setGroupingType] = useState<GroupingType>('year');
+    const inputRef = createRef<HTMLInputElement>()
 
     useEffect(() => {
         photoStore.getPhotos()
     }, [])
 
+    console.log("rerender gallery page");
+
     function onDrop(e: React.DragEvent<HTMLDivElement>) {
-        console.log(e)
         photoStore.appendPhotosForUpload([...e.dataTransfer.files])
         setIsTooltipOpen(true)
+    }
+
+    const handleClose = () => {
+        photoStore.setPhotosForUpload([])
     }
 
     return (
@@ -31,10 +36,22 @@ export const GalleryPage = observer(() => {
             <ToastContainer />
             <div className="min-h-full flex flex-col gap-2 relative">
                 <h1 className="text-lg">Все фотографии</h1>
-                <ImageList photos={photoStore.photos} />
-                <Tooltip className="w-1/2 h-[90%]" isOpen={isTooltipOpen}>
-                    <UploadFilesForm />
-                </Tooltip>
+                <div className="flex border-y-2 border-white/20 p-2 gap-4">
+                    <button className="" onClick={() => {
+                        inputRef.current?.click()
+                    }}>Загрузить</button>
+                    <input onChange={e => {
+                        if (!e.target.files) {
+                            return
+                        }
+                        photoStore.appendPhotosForUpload([...e.target.files])
+                        setIsTooltipOpen(true)
+                    }} type="file" multiple hidden accept="image/*" ref={inputRef} />
+                    <div className="h-auto w-[2px] bg-black/10 dark:bg-white/10"></div>
+                    <GroupingSelector groupingType={groupingType} onGroupingTypeChange={setGroupingType} />
+                </div>
+                <ImageList photos={photoStore.photos} groupingType={groupingType} />
+                <PhotosManager onClose={handleClose} />
             </div>
         </DropZone>
     )
@@ -89,17 +106,42 @@ export const DropZone = ({ onDrop, dropText, children }: DropZoneProps) => {
     )
 }
 
-export const ImageList = ({ photos }: { photos: Photo[] }) => {
-    if (!photos || photos.length == 0) {
+export const ImageList = ({ photos, groupingType }: { photos: Photo[], groupingType: GroupingType }) => {
+    if (!photos || photos.length === 0) {
         return <div>У вас не фотографий</div>
     }
 
+    const groupedPhotos: GroupedPhotos = photos.reduce((acc, photo) => {
+        const createdAt = new Date(photo.createdAt)
+        const month = `${createdAt.toLocaleString('default', { month: 'long' })}`
+        const day = `${createdAt.getDate()}`
+        const year = `${createdAt.getFullYear()}`
+        const key = groupingType === 'year'
+            ? year
+            : groupingType === 'month'
+                ? `${month} ${year}г.`
+                : `${day} ${month} ${year}г.`;
+        if (!acc[key]) {
+            acc[key] = [];
+        }
+        acc[key].push(photo);
+        return acc;
+    }, {} as GroupedPhotos);
+
     return (
-        <div className="w-full grid grid-cols-2 gap-4 md:grid-cols-4">
-            {photos.map(img => (
-                <Image key={img.id} photo={img} />
+        <>
+            {Object.keys(groupedPhotos).map((key) => (
+                <div key={key} className="flex flex-col gap-2">
+                    <p className="capitalize">{key}</p>
+                    <div className="w-full grid grid-cols-2 gap-4 md:grid-cols-6">
+                        {groupedPhotos[key].map(photo =>
+                            <Image key={photo.id} photo={photo} />
+                        )}
+                    </div>
+                </div>
             ))}
-        </div>
+
+        </>
     )
 }
 

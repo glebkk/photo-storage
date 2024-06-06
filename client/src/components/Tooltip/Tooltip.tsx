@@ -1,4 +1,5 @@
 import { ComponentProps, ReactNode } from "react"
+import { createPortal } from "react-dom"
 import { twMerge } from "tailwind-merge"
 
 type Props = {
@@ -7,13 +8,11 @@ type Props = {
 } & ComponentProps<"div">
 
 export const Tooltip = ({ children, isOpen, className }: Props) => {
-    return (
-        <>
-            {isOpen &&
-                <div className={twMerge("fixed bottom-5 right-5", className)}>
-                    {children}
-                </div >
-            }
-        </>
+    if (!isOpen) return null
+    return createPortal(
+        <div className={twMerge("fixed bottom-5 right-5", className)}>
+            {children}
+        </div >,
+        document.body
     )
 }

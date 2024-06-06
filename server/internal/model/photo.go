@@ -1,12 +1,16 @@
 package model
 
-import "mime/multipart"
+import (
+	"mime/multipart"
+	"time"
+)
 
 type Photo struct {
-	ID       int64  `json:"id"`
-	UserId   int64  `json:"userId"`
-	FilePath string `json:"filePath"`
-	Name     string `json:"name"`
+	ID        int64     `json:"id"`
+	UserId    int64     `json:"userId"`
+	FilePath  string    `json:"filePath"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type PhotoCreate struct {
@@ -22,4 +26,9 @@ type PhotoUploadRequest struct {
 
 type PhotoUploadResponse struct {
 	Photo
+}
+
+type PhotoResponse struct {
+	MonthYear string  `json:"monthYear"`
+	Photos    []Photo `json:"photos"`
 }

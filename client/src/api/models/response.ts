@@ -10,4 +10,4 @@ export type UpdatePasswordResponse = {
     message: string
 }
 
-export type PhotosResponse = Photo[]
+export type PhotosResponse = MonthlyPhotos[]

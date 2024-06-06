@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/glebkk/photo-storage/server/internal/config"
@@ -76,10 +77,11 @@ func (pc *PhotoController) UploadPhoto(c *gin.Context) {
 	// File saved successfully. Return proper result
 	c.JSON(http.StatusOK, model.PhotoUploadResponse{
 		Photo: model.Photo{
-			ID:       photoId,
-			Name:     photoCreate.Name,
-			FilePath: photoCreate.FilePath,
-			UserId:   userId,
+			ID:        photoId,
+			Name:      photoCreate.Name,
+			FilePath:  photoCreate.FilePath,
+			UserId:    userId,
+			CreatedAt: time.Now(),
 		},
 	},
 	)
@@ -112,7 +114,24 @@ func (pc *PhotoController) GetAll(c *gin.Context) {
 		return
 	}
 
+	// photosByMonth := make(map[string][]model.Photo)
+	// for _, photo := range photos {
+	// 	monthYear := monday.Format(photo.CreatedAt, "January 2006", monday.LocaleRuRU)
+	// 	photosByMonth[monthYear] = append(photosByMonth[monthYear], *photo)
+	// }
+
+	// Формирование ответа
+	// var response []model.PhotoResponse
+	// for monthYear, monthPhotos := range photosByMonth {
+	// 	response = append(response, model.PhotoResponse{
+	// 		MonthYear: monthYear,
+	// 		Photos:    monthPhotos,
+	// 	})
+	// }
+
 	c.JSON(http.StatusOK, photos)
+
+	// c.JSON(http.StatusOK, photos)
 }
 
 func (pc *PhotoController) Delete(c *gin.Context) {
