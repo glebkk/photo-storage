@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	errBadCredentials = errors.New("email or password is incorrect")
+	errBadCredentials = errors.New("неверный логин или пароль")
 )
 
 type UserRepository interface {

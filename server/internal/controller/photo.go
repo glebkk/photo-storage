@@ -114,24 +114,7 @@ func (pc *PhotoController) GetAll(c *gin.Context) {
 		return
 	}
 
-	// photosByMonth := make(map[string][]model.Photo)
-	// for _, photo := range photos {
-	// 	monthYear := monday.Format(photo.CreatedAt, "January 2006", monday.LocaleRuRU)
-	// 	photosByMonth[monthYear] = append(photosByMonth[monthYear], *photo)
-	// }
-
-	// Формирование ответа
-	// var response []model.PhotoResponse
-	// for monthYear, monthPhotos := range photosByMonth {
-	// 	response = append(response, model.PhotoResponse{
-	// 		MonthYear: monthYear,
-	// 		Photos:    monthPhotos,
-	// 	})
-	// }
-
 	c.JSON(http.StatusOK, photos)
-
-	// c.JSON(http.StatusOK, photos)
 }
 
 func (pc *PhotoController) Delete(c *gin.Context) {

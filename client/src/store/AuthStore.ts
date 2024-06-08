@@ -5,6 +5,7 @@ import { AuthService } from "../api/AuthService";
 import { User } from "../api/models/User";
 import { AuthReponse } from "../api/models/response";
 import { API_URL } from "../axios/axios";
+import { errorToast, successToast } from "../utils/toast";
 
 export class AuthStore {
     user = {} as User
@@ -36,7 +37,7 @@ export class AuthStore {
             this.setUser(resp.data.user)
         } catch (err: unknown) {
             if (err instanceof AxiosError) {
-                toast(err?.response?.data, { className: "bg-red-600 text-white", hideProgressBar: true })
+                errorToast(err?.response?.data?.message)
             }
             if (err instanceof String) {
                 console.log(err);
@@ -53,7 +54,7 @@ export class AuthStore {
             this.setUser(resp.data.user)
         } catch (err: unknown) {
             if (err instanceof AxiosError) {
-                toast(err?.response?.data?.message, { className: "bg-red-600 text-white", hideProgressBar: true })
+                errorToast(err?.response?.data?.message)
             }
             if (err instanceof String) {
                 console.log(err);
@@ -86,7 +87,7 @@ export class AuthStore {
         } catch (err: unknown) {
             console.log("logout err: ", err);
             if (err instanceof AxiosError) {
-                toast(err?.response?.data, { className: "bg-red-600 text-white", hideProgressBar: true })
+                errorToast(err?.response?.data)
             }
             if (err instanceof String) {
                 console.log(err);
@@ -99,11 +100,11 @@ export class AuthStore {
     async updatePassword(oldPassword: string, newPassword: string) {
         try {
             const resp = await AuthService.updatePassword(oldPassword, newPassword)
-            toast(resp?.data?.message, { className: "bg-green-600 text-white", hideProgressBar: true, closeButton: false })
+            successToast(resp?.data?.message)
 
         } catch (err) {
             if (err instanceof AxiosError) {
-                toast(err?.response?.data?.message, { className: "bg-red-600 text-white", hideProgressBar: true, closeButton: false })
+                errorToast(err?.response?.data?.message)
             }
         }
 

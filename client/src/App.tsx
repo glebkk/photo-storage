@@ -9,6 +9,7 @@ import { RegisterPage } from "./pages/RegisterPage"
 import PrivateRoute from "./routes/PrivateRoute"
 import { Root } from "./routes/root"
 import { UserSettingPage } from "./pages/UserSettingPage"
+import { AlbumsPage } from "./pages/AlbumsPage"
 
 function App() {
   const { store: { authStore } } = useContext(StoreContext)
@@ -35,6 +36,7 @@ function App() {
         }>
           <Route path="/" element={<GalleryPage />} />
           <Route path="settings" element={<UserSettingPage />} />
+          <Route path="albums" element={<AlbumsPage />} />
         </Route>
 
         <Route path="/login" element={<LoginPage />} />

@@ -42,13 +42,17 @@ func (ac *AuthController) Register(c *gin.Context) {
 func (ac *AuthController) Login(c *gin.Context) {
 	logReq := model.LoginRequest{}
 	if err := c.ShouldBindBodyWithJSON(&logReq); err != nil {
-		c.JSON(http.StatusInternalServerError, "not valid json")
+		c.JSON(http.StatusForbidden, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 
 	authRes, err := ac.service.Login(logReq)
 	if err != nil {
-		c.JSON(http.StatusForbidden, err.Error())
+		c.JSON(http.StatusForbidden, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 	c.SetCookie("refresh_token", authRes.RefreshToken, 30*24*60*60*1000, "/", "localhost", true, true)

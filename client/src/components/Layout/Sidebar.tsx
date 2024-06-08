@@ -7,7 +7,7 @@ export const Sidebar = () => {
                 <div className="flex flex-col gap-2 w-full">
                     
                     <Link to={"/"} className="p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-900">Фотографии</Link>
-                    <a className="p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-900">Галерея</a>
+                    <Link to={"/albums"} className="p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-900">Альбомы</Link>
                     <a className="p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-900">Выйти</a>
                 </div>
             </div>

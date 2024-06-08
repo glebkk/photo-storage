@@ -12,5 +12,5 @@ func RegisterPhotoRoutes(rg *gin.RouterGroup, pc PhotoController) {
 	photo := rg.Group("/photo")
 	photo.POST("/", pc.UploadPhoto)
 	photo.GET("/", pc.GetAll)
-	photo.DELETE("/", pc.Delete)
+	photo.DELETE("", pc.Delete)
 }

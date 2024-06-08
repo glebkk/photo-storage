@@ -2,6 +2,7 @@ import { AxiosError } from "axios";
 import { makeAutoObservable } from "mobx";
 import { toast } from "react-toastify";
 import { PhotoService } from "../api/PhotoService";
+import { errorToast, successToast } from "../utils/toast";
 
 export class PhotoStore {
     photos: Photo[] = []
@@ -23,25 +24,25 @@ export class PhotoStore {
 
     removePhotoUpload(index: number) {
         console.log(index);
-        
+
         this.photosForUpload = this.photosForUpload.filter((_, ind) => ind !== index)
         console.log(this.photosForUpload);
-        
+
     }
 
     async getPhotos() {
         try {
             const photos = await PhotoService.getPhotos();
             this.setPhotos(photos.data)
-        } catch (err: unknown) {
-            console.log("getPhotos err: ", err);
-            if (err instanceof AxiosError) {
-                toast(err?.response?.data.message, { className: "bg-red-600 text-white", hideProgressBar: true })
-            }
-            if (err instanceof String) {
-                console.log(err);
+        } catch (e: unknown) {
+            console.log("getPhotos err: ", e);
+            if (e instanceof AxiosError) {
+                errorToast(e?.response?.data?.message)
 
-                toast(err)
+            }
+            if (e instanceof String) {
+                console.log(e);
+                toast(e)
             }
         }
     }
@@ -54,11 +55,25 @@ export class PhotoStore {
             const createdPhoto = await PhotoService.createPhoto(formData)
 
             this.photos.push(createdPhoto.data)
-            toast("Фото успешно загружено", { className: "bg-green-600 text-white", hideProgressBar: true })
+            successToast("Фото успешно загружено")
         } catch (e) {
             console.log("create photo errir", e);
             if (e instanceof AxiosError) {
-                toast(e?.response?.data?.message, { className: "bg-red-600 text-white", hideProgressBar: true })
+                errorToast(e?.response?.data?.message)
+            }
+        }
+    }
+
+    async deletePhoto(name: string) {
+        try {
+            const resp = await PhotoService.deletePhoto(name)
+            console.log(resp);
+            this.photos = this.photos.filter(photo => photo.name != name)
+            successToast("Фото удалено")
+        } catch (e) {
+            console.log("create photo errir", e);
+            if (e instanceof AxiosError) {
+                errorToast(e?.response?.data?.message)
             }
         }
     }
