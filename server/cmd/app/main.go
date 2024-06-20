@@ -12,6 +12,8 @@ import (
 
 func main() {
 	cfg := config.MustLoad()
+	fmt.Println(cfg)
+	fmt.Println(cfg.DataBase.Password)
 	host := os.Getenv("DB_HOST")
 	if host == "" {
 		host = cfg.DataBase.Host
