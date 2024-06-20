@@ -1,12 +1,17 @@
-FROM golang:1.19-alpine AS builder
-WORKDIR /app
+FROM golang:alpine AS builder
+
+WORKDIR /build
+
+ADD go.mod .
+
 COPY . .
-RUN go mod download
-RUN go build -o ./example-golang ./cmd/app/main.go
- 
- 
-FROM alpine:latest AS runner
-WORKDIR /app
-COPY --from=builder /app/example-golang .
-EXPOSE 8080
-ENTRYPOINT ["./example-golang --config ./config/config.yaml"]
+
+RUN go build -o app cmd/app/main.go
+
+FROM alpine
+
+WORKDIR /build
+
+COPY --from=builder /build/app /build/app
+
+CMD [". /app --config config.yaml"]
