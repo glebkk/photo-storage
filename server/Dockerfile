@@ -1,17 +1,10 @@
-FROM golang:alpine AS builder
+FROM golang:alpine
 
-WORKDIR /build
+WORKDIR /app
 
 ADD go.mod .
-
 COPY . .
 
 RUN go build -o app cmd/app/main.go
 
-FROM alpine
-
-WORKDIR /build
-
-COPY --from=builder /build/app /build/app
-
-CMD [". /app --config ./config/config.yaml"]
+CMD ["./app", "--config", "./config/config.yaml"]
