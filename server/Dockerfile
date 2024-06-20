@@ -14,4 +14,4 @@ WORKDIR /build
 
 COPY --from=builder /build/app /build/app
 
-CMD [". /app --config config/config.yaml"]
+CMD [". /app --config ./config/config.yaml"]
