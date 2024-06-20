@@ -14,4 +14,6 @@ WORKDIR /build
 
 COPY --from=builder /build/app /build/app
 
+RUN "ls -la"
+
 CMD [". /app --config config.yaml"]
