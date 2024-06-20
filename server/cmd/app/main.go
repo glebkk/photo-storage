@@ -17,7 +17,7 @@ func main() {
 		host = cfg.DataBase.Host
 	}
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
+		"password=%s dbname=%s sslmode=require",
 		host, cfg.DataBase.Port, cfg.DataBase.User, cfg.DataBase.Password, cfg.DataBase.Name)
 
 	db, err := sql.Open("postgres", psqlInfo)
