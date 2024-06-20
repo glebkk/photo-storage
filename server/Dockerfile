@@ -1,14 +1,12 @@
-ARG GO_VERSION=1
-FROM golang:${GO_VERSION}-bookworm as builder
-
-WORKDIR /usr/src/app
-COPY go.mod go.sum ./
-RUN go mod download && go mod verify
+FROM golang:1.19-alpine AS builder
+WORKDIR /app
 COPY . .
-RUN go build -v -o /run-app .
-
-
-FROM debian:bookworm
-
-COPY --from=builder /run-app /usr/local/bin/
-CMD ["run-app"]
+RUN go mod download
+RUN go build -o ./example-golang ./cmd/app/main.go
+ 
+ 
+FROM alpine:latest AS runner
+WORKDIR /app
+COPY --from=builder /app/example-golang .
+EXPOSE 8080
+ENTRYPOINT ["./example-golang --config ./config/config.yaml"]
