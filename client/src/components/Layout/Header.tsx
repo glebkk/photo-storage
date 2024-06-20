@@ -12,9 +12,9 @@ export const Header = observer(() => {
     const { store: { authStore: store } } = useContext(StoreContext)
 
     return (
-        <header className="w-full px-4 py-3 flex gap-4 justify-between items-center h-16 rounded-b-lg bg-white dark:bg-zinc-800">
+        <header className="w-full px-4 py-3 flex gap-4 justify-end items-center h-16 rounded-b-lg bg-white dark:bg-zinc-800">
             
-            <input className="w-full h-full" type="text" placeholder="Поиск" />
+            {/* <input className="w-full h-full" type="text" placeholder="Поиск" /> */}
             <Dropdown
                 rendererElement={
                     <div className="flex gap-2 items-center cursor-pointer">

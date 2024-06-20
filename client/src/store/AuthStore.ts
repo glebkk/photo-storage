@@ -5,7 +5,7 @@ import { AuthService } from "../api/AuthService";
 import { User } from "../api/models/User";
 import { AuthReponse } from "../api/models/response";
 import { API_URL } from "../axios/axios";
-import { errorToast, successToast } from "../utils/toast";
+import { toastError, toastErrorUpdate, toastSettings, toastSuccessUpdate } from "../utils/toast";
 
 export class AuthStore {
     user = {} as User
@@ -37,7 +37,7 @@ export class AuthStore {
             this.setUser(resp.data.user)
         } catch (err: unknown) {
             if (err instanceof AxiosError) {
-                errorToast(err?.response?.data?.message)
+                toastError(err?.response?.data?.message)
             }
             if (err instanceof String) {
                 console.log(err);
@@ -54,7 +54,7 @@ export class AuthStore {
             this.setUser(resp.data.user)
         } catch (err: unknown) {
             if (err instanceof AxiosError) {
-                errorToast(err?.response?.data?.message)
+                toastError(err?.response?.data?.message)
             }
             if (err instanceof String) {
                 console.log(err);
@@ -87,7 +87,7 @@ export class AuthStore {
         } catch (err: unknown) {
             console.log("logout err: ", err);
             if (err instanceof AxiosError) {
-                errorToast(err?.response?.data)
+                toastError(err?.response?.data)
             }
             if (err instanceof String) {
                 console.log(err);
@@ -98,13 +98,14 @@ export class AuthStore {
     }
 
     async updatePassword(oldPassword: string, newPassword: string) {
+        const toastId = toast.loading("Загрузка", toastSettings)
+        
         try {
             const resp = await AuthService.updatePassword(oldPassword, newPassword)
-            successToast(resp?.data?.message)
-
+            toastSuccessUpdate(toastId, resp?.data?.message)
         } catch (err) {
             if (err instanceof AxiosError) {
-                errorToast(err?.response?.data?.message)
+                toastErrorUpdate(toastId, err?.response?.data?.message)
             }
         }
 

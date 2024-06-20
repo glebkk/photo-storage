@@ -1,13 +1,21 @@
 import { observer } from "mobx-react-lite";
+import { useContext, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { Header } from "../components/Layout/Header";
 import { Sidebar } from "../components/Layout/Sidebar";
-import { FileProvider } from "../context/FileContext";
 import { TooltipProvider } from "../context/TooltipContext";
+import { StoreContext } from "../main";
 
 export const Root = observer(function () {
+    const { photoStore, albumsStore } = useContext(StoreContext).store
+
+    useEffect(() => {
+        photoStore.getPhotos()
+        albumsStore.getAlbums()
+    }, [])
+
     return (
         <>
             <ToastContainer />

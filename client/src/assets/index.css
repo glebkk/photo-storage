@@ -42,3 +42,7 @@ input {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
+
+a.active {
+    @apply bg-gray-300 dark:bg-zinc-900;
+}

@@ -10,9 +10,8 @@ import (
 	"github.com/glebkk/photo-storage/server/internal/config"
 	"github.com/glebkk/photo-storage/server/internal/model"
 	"github.com/glebkk/photo-storage/server/internal/service"
+	"github.com/glebkk/photo-storage/server/internal/utils"
 	"github.com/google/uuid"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type PhotoController struct {
@@ -31,22 +30,13 @@ func (pc *PhotoController) UploadPhoto(c *gin.Context) {
 	fmt.Println(req)
 	// return
 
-	claimsInterface, ok := c.Get("x-user-claims")
+	claims, ok := utils.GetJWTClaims(c)
 	if !ok {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	// Type-assert the claims to the jwtClaims type
-	claimsObj, ok := claimsInterface.(jwt.MapClaims)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Что-то пошло не так",
-		})
-		return
-	}
-
-	userId := int64(claimsObj["id"].(float64))
+	userId := int64(claims["id"].(float64))
 	// The file cannot be received.
 
 	// Retrieve file information
@@ -88,22 +78,13 @@ func (pc *PhotoController) UploadPhoto(c *gin.Context) {
 }
 
 func (pc *PhotoController) GetAll(c *gin.Context) {
-	claimsInterface, ok := c.Get("x-user-claims")
+	claims, ok := utils.GetJWTClaims(c)
 	if !ok {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	// Type-assert the claims to the jwtClaims type
-	claimsObj, ok := claimsInterface.(jwt.MapClaims)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Что-то пошло не так",
-		})
-		return
-	}
-
-	userId := int64(claimsObj["id"].(float64))
+	userId := int64(claims["id"].(float64))
 
 	photos, err := pc.photoService.GetAll(userId)
 	if err != nil {
@@ -125,22 +106,13 @@ func (pc *PhotoController) Delete(c *gin.Context) {
 		})
 	}
 
-	claimsInterface, ok := c.Get("x-user-claims")
+	claims, ok := utils.GetJWTClaims(c)
 	if !ok {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	// Type-assert the claims to the jwtClaims type
-	claimsObj, ok := claimsInterface.(jwt.MapClaims)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Что-то пошло не так",
-		})
-		return
-	}
-
-	userId := int64(claimsObj["id"].(float64))
+	userId := int64(claims["id"].(float64))
 
 	err := pc.photoService.Delete(name, userId)
 

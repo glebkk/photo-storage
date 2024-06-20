@@ -9,8 +9,6 @@ export const instance = axios.create({
 });
 
 
-// создаем перехватчик запросов
-// который к каждому запросу добавляет accessToken из localStorage
 instance.interceptors.request.use(
     (config) => {
         config.headers.Authorization = `Bearer ${localStorage.getItem("token")}`
@@ -19,9 +17,6 @@ instance.interceptors.request.use(
 )
 
 
-// создаем перехватчик ответов
-// который в случае невалидного accessToken попытается его обновить
-// и переотправить запрос с обновленным accessToken
 // instance.interceptors.response.use(
 //     // в случае валидного accessToken ничего не делаем:
 //     (config) => {

@@ -1,3 +1,4 @@
+import { Album } from "./Album"
 import { User } from "./User"
 
 export type AuthReponse = {
@@ -10,4 +11,4 @@ export type UpdatePasswordResponse = {
     message: string
 }
 
-export type PhotosResponse = MonthlyPhotos[]
+export type AlbumsResponse = Album[]

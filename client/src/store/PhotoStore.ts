@@ -2,7 +2,8 @@ import { AxiosError } from "axios";
 import { makeAutoObservable } from "mobx";
 import { toast } from "react-toastify";
 import { PhotoService } from "../api/PhotoService";
-import { errorToast, successToast } from "../utils/toast";
+import { toastError, toastErrorUpdate, toastSettings, toastSuccessUpdate } from "../utils/toast";
+import { RootStore } from "./store";
 
 export class PhotoStore {
     photos: Photo[] = []
@@ -37,8 +38,7 @@ export class PhotoStore {
         } catch (e: unknown) {
             console.log("getPhotos err: ", e);
             if (e instanceof AxiosError) {
-                errorToast(e?.response?.data?.message)
-
+                toastError(e?.response?.data?.message)
             }
             if (e instanceof String) {
                 console.log(e);
@@ -48,37 +48,40 @@ export class PhotoStore {
     }
 
     async createPhoto(file: PhotoCreate) {
+        const toastId = toast.loading("Загрузка", toastSettings)
+
         try {
             const formData = new FormData()
             formData.append("file", file.file)
             formData.append("name", file.name)
             const createdPhoto = await PhotoService.createPhoto(formData)
-
-            this.photos.push(createdPhoto.data)
-            successToast("Фото успешно загружено")
+            this.setPhotos([createdPhoto.data, ...this.photos])
+            toastSuccessUpdate(toastId, "Фото успешно загружено")
         } catch (e) {
             console.log("create photo errir", e);
             if (e instanceof AxiosError) {
-                errorToast(e?.response?.data?.message)
+                toastErrorUpdate(toastId, e?.response?.data?.message)
             }
         }
     }
 
-    async deletePhoto(name: string) {
+    async deletePhoto(photo: Photo) {
+        const toastId = toast.loading("Загрузка", toastSettings)
         try {
-            const resp = await PhotoService.deletePhoto(name)
+            const resp = await PhotoService.deletePhoto(photo.name)
             console.log(resp);
-            this.photos = this.photos.filter(photo => photo.name != name)
-            successToast("Фото удалено")
+            this.setPhotos(this.photos.filter(ph => ph.name != photo.name))
+            this.rootStore.albumsStore.removePhotoFromAlbums(photo.id)
+            toastSuccessUpdate(toastId, "Фото удалено")
         } catch (e) {
-            console.log("create photo errir", e);
+            console.log("create delet errir", e);
             if (e instanceof AxiosError) {
-                errorToast(e?.response?.data?.message)
+                toastErrorUpdate(toastId, e?.response?.data?.message)
             }
         }
     }
 
-    constructor() {
+    constructor(private rootStore: RootStore) {
         makeAutoObservable(this);
     }
 }

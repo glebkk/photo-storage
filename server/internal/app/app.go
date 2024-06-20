@@ -38,13 +38,14 @@ func (a *App) Run() {
 	userRepo := storage.NewUserRepository(a.db)
 	tokenRepo := storage.NewTokenRepository(a.db)
 	photoRepo := storage.NewPhotoRepository(a.db)
+	albumRepo := storage.NewAlbumRepository(a.db)
 
 	//init services
 	tokenService := service.NewTokenService(tokenRepo, userRepo, *a.cfg)
 	authService := service.NewAuthService(userRepo, *tokenService)
 	photoService := service.NewPhotoService(photoRepo)
 	userService := service.NewUserService(userRepo)
-
+	albumService := service.NewAlbumService(albumRepo)
 	//init middlewares
 	privateRoutes.Use(middleware.JwtAuthMiddleware(a.cfg.JwtConfig.AccessSecret, tokenService))
 
@@ -52,6 +53,7 @@ func (a *App) Run() {
 	authController := controller.NewAuthController(authService)
 	photoController := controller.NewPhotoController(photoService, *a.cfg)
 	userController := controller.NewUserController(userService)
+	albumController := controller.NewAlbumController(albumService)
 
 	//init routes
 	routes.RegisterAuthRoutes(&router.RouterGroup, authController)
@@ -59,6 +61,7 @@ func (a *App) Run() {
 
 	routes.RegisterUserRoutes(privateRoutes, userController)
 	routes.RegisterPhotoRoutes(privateRoutes, photoController)
+	routes.RegisterAlbumRoutes(privateRoutes, albumController)
 
 	//run server
 	if err := router.Run(a.cfg.HTTP.Address); err != nil {
