@@ -7,4 +7,4 @@ COPY . .
 
 RUN go build -o app cmd/app/main.go
 
-CMD ["sleep", "3", "&&", "./app", "--config", "./config/config.yaml"]
+CMD ["sleep", "3"; "./app", "--config", "./config/config.yaml"]
