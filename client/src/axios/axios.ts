@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_URL = "http://localhost:8080"
+export const API_URL = "https://photo-storage-production.up.railway.app"
 
 export const instance = axios.create({
     // к запросу будет приуепляться cookies

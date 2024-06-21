@@ -11,7 +11,7 @@ export const TooltipContext = createContext<TooltipContextState>({
     toggleTooltip() {
         
     },
-    setIsTooltipOpen(bool: boolean) {
+    setIsTooltipOpen() {
 
     }
 });

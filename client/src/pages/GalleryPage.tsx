@@ -7,9 +7,6 @@ import { Image } from "../components/Images/Image";
 import { PhotosManager } from "../components/Tooltip/PhotosManager";
 import { TooltipContext } from "../context/TooltipContext";
 import { StoreContext } from "../main";
-import { HiDotsVertical } from "react-icons/hi";
-import { Dropdown } from "../components/Popup";
-
 
 
 export const GalleryPage = observer(() => {
