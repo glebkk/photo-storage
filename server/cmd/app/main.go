@@ -14,13 +14,13 @@ func main() {
 	cfg := config.MustLoad()
 	fmt.Println(cfg)
 	fmt.Println(cfg.DataBase.Password)
-	host := os.Getenv("DB_HOST")
-	if host == "" {
-		host = cfg.DataBase.Host
+	psqlInfo := os.Getenv("DB_CONNECTION_STRING")
+	if psqlInfo == "" {
+		psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
+			"password=%s dbname=%s sslmode=require",
+			cfg.DataBase.Host, cfg.DataBase.Port, cfg.DataBase.User, cfg.DataBase.Password, cfg.DataBase.Name)
+
 	}
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=require",
-		host, cfg.DataBase.Port, cfg.DataBase.User, cfg.DataBase.Password, cfg.DataBase.Name)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err := db.Ping(); err != nil {
