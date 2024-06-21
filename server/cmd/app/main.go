@@ -24,6 +24,7 @@ func main() {
 		"password=%s dbname=%s sslmode=require",
 		host, dbPort, dbUser, dbPassword, dbName)
 
+	fmt.Println(dbName, dbPassword, dbPort, dbUser, host)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err := db.Ping(); err != nil {
 		fmt.Print("db connect err: ", err)
