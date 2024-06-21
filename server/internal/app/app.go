@@ -66,7 +66,7 @@ func (a *App) Run() {
 
 	//run server
 	port := os.Getenv("PORT")
-	if err := router.Run(`a.cfg.HTTP.Address` + port); err != nil {
+	if err := router.Run(a.cfg.HTTP.Address + ":" + port); err != nil {
 		fmt.Println("Error starting server on host", a.cfg.HTTP.Address)
 	}
 }
