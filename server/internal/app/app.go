@@ -3,6 +3,7 @@ package app
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -64,7 +65,8 @@ func (a *App) Run() {
 	routes.RegisterAlbumRoutes(privateRoutes, albumController)
 
 	//run server
-	if err := router.Run(a.cfg.HTTP.Address); err != nil {
+	port := os.Getenv("PORT")
+	if err := router.Run(`a.cfg.HTTP.Address` + port); err != nil {
 		fmt.Println("Error starting server on host", a.cfg.HTTP.Address)
 	}
 }
