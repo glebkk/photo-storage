@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/glebkk/photo-storage/server/internal/app"
 	"github.com/glebkk/photo-storage/server/internal/config"
@@ -14,13 +15,14 @@ func main() {
 	cfg := config.MustLoad()
 	fmt.Println(cfg)
 	fmt.Println(cfg.DataBase.Password)
-	psqlInfo := os.Getenv("DB_CONNECTION_STRING")
-	if psqlInfo == "" {
-		psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
-			"password=%s dbname=%s sslmode=require",
-			cfg.DataBase.Host, cfg.DataBase.Port, cfg.DataBase.User, cfg.DataBase.Password, cfg.DataBase.Name)
-
-	}
+	host := os.Getenv("DB_HOST")
+	dbName := os.Getenv("DB_NAME")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbPort, _ := strconv.Atoi(os.Getenv("DB_PORT"))
+	dbUser := os.Getenv("DB_USER")
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=require",
+		host, dbPort, dbUser, dbPassword, dbName)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err := db.Ping(); err != nil {
