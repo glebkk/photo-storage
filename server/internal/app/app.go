@@ -27,7 +27,7 @@ func (a *App) Run() {
 
 	router.Static("/public", "./photos")
 	myCors := cors.DefaultConfig()
-	myCors.AllowOrigins = []string{"http://localhost:5173", "http://localhost:5173/"}
+	myCors.AllowOrigins = []string{"http://localhost:5173", "http://localhost:5173/", "https://photo-storage-nyea.vercel.app/", "https://photo-storage-nyea.vercel.app"}
 	myCors.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	myCors.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
 	myCors.AllowCredentials = true
